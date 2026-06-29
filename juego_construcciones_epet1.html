@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Taller de Construcciones — E.P.E.T. N.° 1</title>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -115,14 +114,8 @@
   .dot.mal { background: var(--rojo); }
   .det-guia { font-size: 11px; color: var(--texto-2); display: block; margin-bottom: 1px; }
 
-  /* QR SECTION */
-  .qr-section { background: var(--blanco); border: 1px solid var(--gris-borde); border-radius: var(--radio); padding: 1.8rem; text-align: center; margin-top: 1.5rem; }
-  .qr-section h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; color: var(--texto); }
-  .qr-section p { font-size: 13px; color: var(--texto-2); margin-bottom: 1rem; }
-  #qr-canvas { margin: 0 auto; }
-  .qr-instruccion { font-size: 12px; color: var(--texto-2); margin-top: 0.8rem; line-height: 1.5; }
-  .btn-imprimir { display: inline-block; margin-top: 1rem; padding: 9px 22px; background: var(--rojo); color: #fff; border: none; border-radius: var(--radio-sm); font-size: 13px; font-weight: 600; cursor: pointer; }
-  .btn-imprimir:hover { background: var(--rojo-dark); }
+
+
 
   /* PANTALLA */
   .pantalla { display: none; }
@@ -138,7 +131,6 @@
     body { background: white; padding: 0; }
     .contenedor { max-width: 100%; }
     .pantalla { display: none !important; }
-    .qr-section { display: block !important; border: 2px solid #000; }
     .btn-imprimir { display: none; }
   }
 </style>
@@ -252,14 +244,7 @@
 
 </div><!-- fin contenedor -->
 
-<!-- QR para imprimir (siempre visible en print, oculto en pantalla) -->
-<div class="qr-section" id="qr-section" style="display:none;">
-  <h3>🏗️ Juego — Taller de Construcciones</h3>
-  <p>Escaneá el QR con tu celular para jugar</p>
-  <div id="qr-canvas"></div>
-  <p class="qr-instruccion">E.P.E.T. N.° 1 Ing. Rogelio Boero<br>Prof. Bogni · 3.er año · 2026</p>
-  <button class="btn-imprimir" onclick="window.print()">🖨️ Imprimir QR</button>
-</div>
+
 
 <script>
 (function(){ emailjs.init({ publicKey: 'JbsAF5kSIDkI9dujf' }); })();
@@ -300,23 +285,7 @@ window.onload = function() {
   if (localStorage.getItem(CLAVE_LOCAL)) {
     mostrar('s-bloqueado');
   }
-  generarQR();
 };
-
-function generarQR() {
-  const url = window.location.href.split('?')[0];
-  try {
-    new QRCode(document.getElementById('qr-canvas'), {
-      text: url,
-      width: 180,
-      height: 180,
-      colorDark: '#c0392b',
-      colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.H
-    });
-    document.getElementById('qr-section').style.display = 'block';
-  } catch(e) {}
-}
 
 function iniciar() {
   const n = document.getElementById('i-nombre').value.trim();
