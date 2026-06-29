@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Taller de Construcciones — E.P.E.T. N.° 1</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --rojo: #c0392b;
+    --rojo-dark: #922b21;
+    --rojo-light: #fde8e8;
+    --verde: #1e8449;
+    --verde-light: #eafaf1;
+    --gris: #f4f4f4;
+    --gris-borde: #ddd;
+    --texto: #1a1a1a;
+    --texto-2: #555;
+    --blanco: #ffffff;
+    --radio: 12px;
+    --radio-sm: 8px;
+  }
+  html { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f0f0; color: var(--texto); }
+  body { min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 1.5rem 1rem; }
+  .contenedor { width: 100%; max-width: 600px; }
+
+  /* PANTALLA BLOQUEADA */
+  #s-bloqueado { background: var(--blanco); border-radius: var(--radio); padding: 2.5rem 2rem; text-align: center; box-shadow: 0 2px 16px rgba(0,0,0,0.08); }
+  .icono-bloqueo { font-size: 56px; margin-bottom: 1rem; }
+  #s-bloqueado h2 { font-size: 22px; font-weight: 600; color: var(--rojo); margin-bottom: 0.5rem; }
+  #s-bloqueado p { font-size: 15px; color: var(--texto-2); line-height: 1.6; }
+
+  /* CABECERA */
+  .cabecera { background: var(--rojo); border-radius: var(--radio) var(--radio) 0 0; padding: 1.4rem 1.8rem; margin-bottom: 0; }
+  .cabecera h1 { color: #fff; font-size: 21px; font-weight: 600; margin-bottom: 3px; }
+  .cabecera p { color: rgba(255,255,255,0.82); font-size: 13px; }
+
+  /* TARJETA */
+  .card { background: var(--blanco); border: 1px solid var(--gris-borde); border-top: none; padding: 1.5rem 1.8rem; }
+  .card:last-child { border-radius: 0 0 var(--radio) var(--radio); }
+  .card + .card { border-top: 1px solid var(--gris-borde); }
+
+  /* PANTALLA INTRO */
+  .emoji-grande { font-size: 52px; text-align: center; margin-bottom: 1rem; display: block; }
+  .intro-titulo { font-size: 20px; font-weight: 600; margin-bottom: 0.5rem; }
+  .intro-desc { font-size: 14px; color: var(--texto-2); line-height: 1.65; margin-bottom: 1rem; }
+  .badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 0.5rem; }
+  .badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+  .badge-r { background: var(--rojo-light); color: var(--rojo-dark); }
+  .badge-b { background: #e8f0fe; color: #1a56a0; }
+  .badge-g { background: var(--verde-light); color: var(--verde); }
+
+  /* FORMULARIO */
+  .form-titulo { font-size: 15px; font-weight: 600; margin-bottom: 1rem; }
+  .fg { margin-bottom: 0.9rem; }
+  .fg label { display: block; font-size: 13px; color: var(--texto-2); margin-bottom: 4px; font-weight: 500; }
+  .fg input { width: 100%; padding: 10px 14px; border: 1.5px solid var(--gris-borde); border-radius: var(--radio-sm); font-size: 14px; color: var(--texto); outline: none; transition: border-color 0.2s; }
+  .fg input:focus { border-color: var(--rojo); box-shadow: 0 0 0 3px rgba(192,57,43,0.1); }
+  .err { color: var(--rojo); font-size: 13px; margin-top: 6px; display: none; }
+
+  /* BOTONES */
+  .btn-principal { display: block; width: 100%; padding: 13px; background: var(--rojo); color: #fff; border: none; border-radius: var(--radio-sm); font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 1rem; letter-spacing: 0.2px; transition: background 0.15s; }
+  .btn-principal:hover { background: var(--rojo-dark); }
+  .btn-principal:disabled { background: #bbb; cursor: not-allowed; }
+
+  /* PROGRESO */
+  .prog-lbl { font-size: 13px; color: var(--texto-2); margin-bottom: 5px; display: flex; justify-content: space-between; }
+  .prog-barra { background: #e8e8e8; border-radius: 20px; height: 7px; margin-bottom: 1.2rem; }
+  .prog-fill { background: var(--rojo); height: 7px; border-radius: 20px; transition: width 0.4s ease; }
+  .q-guia { font-size: 11px; font-weight: 700; color: var(--rojo); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .q-texto { font-size: 17px; font-weight: 600; line-height: 1.45; margin-bottom: 1.2rem; color: var(--texto); }
+
+  /* OPCIONES */
+  .opciones { display: flex; flex-direction: column; gap: 9px; }
+  .opcion { padding: 13px 16px; border: 1.5px solid var(--gris-borde); border-radius: var(--radio-sm); background: var(--blanco); cursor: pointer; font-size: 14px; color: var(--texto); text-align: left; line-height: 1.4; transition: all 0.15s; }
+  .opcion:hover { border-color: var(--rojo); background: var(--rojo-light); color: var(--rojo-dark); }
+  .opcion.correcta { border-color: var(--verde); background: var(--verde-light); color: var(--verde); cursor: default; font-weight: 500; }
+  .opcion.incorrecta { border-color: var(--rojo); background: var(--rojo-light); color: var(--rojo-dark); cursor: default; }
+  .opcion.bloqueada { pointer-events: none; opacity: 0.55; }
+
+  /* FEEDBACK */
+  .feedback { margin-top: 1rem; padding: 12px 16px; border-radius: var(--radio-sm); font-size: 14px; line-height: 1.55; display: none; }
+  .feedback.ok { background: var(--verde-light); color: #145a32; border: 1px solid #a9dfbf; }
+  .feedback.mal { background: var(--rojo-light); color: #922b21; border: 1px solid #f1948a; }
+
+  /* MARCADOR LIVE */
+  .marcador { text-align: center; margin-top: 0.8rem; font-size: 13px; color: var(--texto-2); }
+
+  /* ENVIANDO */
+  .enviando-box { text-align: center; padding: 3rem 2rem; }
+  .spinner { width: 44px; height: 44px; border: 4px solid #eee; border-top-color: var(--rojo); border-radius: 50%; animation: girar 0.9s linear infinite; margin: 0 auto 1rem; }
+  @keyframes girar { to { transform: rotate(360deg); } }
+  .enviando-box p { font-size: 15px; color: var(--texto-2); }
+
+  /* RESULTADO */
+  .circulo-score { width: 110px; height: 110px; border-radius: 50%; background: var(--rojo); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 1.2rem; }
+  .score-num { font-size: 32px; font-weight: 700; line-height: 1; }
+  .score-sub { font-size: 12px; opacity: 0.85; }
+  .res-titulo { font-size: 20px; font-weight: 600; text-align: center; margin-bottom: 4px; }
+  .res-desc { font-size: 14px; color: var(--texto-2); text-align: center; margin-bottom: 1.2rem; line-height: 1.5; }
+  .nota-caja { background: var(--gris); border-radius: var(--radio-sm); padding: 10px 16px; text-align: center; margin-bottom: 0.5rem; }
+  .nota-caja span { font-size: 13px; color: var(--texto-2); }
+  .nota-pill { display: inline-block; padding: 5px 18px; border-radius: 20px; font-size: 15px; font-weight: 700; margin-left: 8px; }
+  .mail-box { background: #e8f4fd; border: 1px solid #aed6f1; border-radius: var(--radio-sm); padding: 12px 16px; font-size: 14px; color: #1a5276; margin-bottom: 0; }
+  .mail-box strong { color: #1a3a5c; }
+
+  /* DETALLE */
+  .detalle-titulo { font-size: 14px; font-weight: 600; margin-bottom: 0.8rem; }
+  .det-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; color: var(--texto); }
+  .det-item:last-child { border-bottom: none; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+  .dot.ok { background: var(--verde); }
+  .dot.mal { background: var(--rojo); }
+  .det-guia { font-size: 11px; color: var(--texto-2); display: block; margin-bottom: 1px; }
+
+  /* QR SECTION */
+  .qr-section { background: var(--blanco); border: 1px solid var(--gris-borde); border-radius: var(--radio); padding: 1.8rem; text-align: center; margin-top: 1.5rem; }
+  .qr-section h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; color: var(--texto); }
+  .qr-section p { font-size: 13px; color: var(--texto-2); margin-bottom: 1rem; }
+  #qr-canvas { margin: 0 auto; }
+  .qr-instruccion { font-size: 12px; color: var(--texto-2); margin-top: 0.8rem; line-height: 1.5; }
+  .btn-imprimir { display: inline-block; margin-top: 1rem; padding: 9px 22px; background: var(--rojo); color: #fff; border: none; border-radius: var(--radio-sm); font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-imprimir:hover { background: var(--rojo-dark); }
+
+  /* PANTALLA */
+  .pantalla { display: none; }
+  .pantalla.activa { display: block; }
+
+  @media (max-width: 480px) {
+    body { padding: 0.75rem 0.5rem; }
+    .cabecera { padding: 1.1rem 1.2rem; }
+    .card { padding: 1.2rem 1.2rem; }
+    .q-texto { font-size: 15px; }
+  }
+  @media print {
+    body { background: white; padding: 0; }
+    .contenedor { max-width: 100%; }
+    .pantalla { display: none !important; }
+    .qr-section { display: block !important; border: 2px solid #000; }
+    .btn-imprimir { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="contenedor">
+
+  <!-- BLOQUEADO -->
+  <div id="s-bloqueado" class="pantalla">
+    <div class="icono-bloqueo">🔒</div>
+    <h2>Ya completaste este juego</h2>
+    <p>Solo se puede responder una vez. Si creés que hay un error, consultá a la profesora Bogni.</p>
+  </div>
+
+  <!-- INTRO -->
+  <div id="s-intro" class="pantalla activa">
+    <div class="cabecera">
+      <h1>🏗️ Taller de Construcciones</h1>
+      <p>E.P.E.T. N.° 1 Ing. Rogelio Boero — 3.er año · 2026</p>
+    </div>
+    <div class="card">
+      <span class="emoji-grande">🏗️</span>
+      <p class="intro-titulo">¡Bienvenido al desafío!</p>
+      <p class="intro-desc">Respondé 20 preguntas sobre los contenidos del taller: historia, seguridad, herramientas, materiales, estructura y mampostería.<br><br>⚠️ <strong>Solo podés responder una sola vez.</strong> Al terminar, tus resultados se envían automáticamente a la profesora.</p>
+      <div class="badges">
+        <span class="badge badge-r">20 preguntas</span>
+        <span class="badge badge-b">Una sola oportunidad</span>
+        <span class="badge badge-g">Envío automático</span>
+      </div>
+    </div>
+    <div class="card">
+      <p class="form-titulo">Completá tus datos para comenzar</p>
+      <div class="fg">
+        <label>Nombre completo</label>
+        <input type="text" id="i-nombre" placeholder="Ej: Juan García"/>
+      </div>
+      <div class="fg">
+        <label>Curso</label>
+        <input type="text" id="i-curso" placeholder="Ej: 3°4"/>
+      </div>
+      <div class="fg">
+        <label>Tu correo electrónico (recibirás tu resultado)</label>
+        <input type="email" id="i-email" placeholder="tu@mail.com"/>
+      </div>
+      <p class="err" id="err-intro">Completá todos los campos correctamente para continuar.</p>
+      <button class="btn-principal" onclick="iniciar()">Empezar el juego →</button>
+    </div>
+  </div>
+
+  <!-- JUEGO -->
+  <div id="s-juego" class="pantalla">
+    <div class="cabecera">
+      <h1>🏗️ Taller de Construcciones</h1>
+      <p id="h-alumno"></p>
+    </div>
+    <div class="card">
+      <div class="prog-lbl">
+        <span id="prog-txt">Pregunta 1 de 20</span>
+        <span id="prog-pct">5%</span>
+      </div>
+      <div class="prog-barra"><div class="prog-fill" id="prog-fill" style="width:5%"></div></div>
+      <p class="q-guia" id="q-guia"></p>
+      <p class="q-texto" id="q-texto"></p>
+      <div class="opciones" id="opciones"></div>
+      <div class="feedback" id="feedback"></div>
+      <button class="btn-principal" id="btn-sig" style="display:none;" onclick="siguiente()">Siguiente →</button>
+    </div>
+    <div class="marcador">✅ <span id="l-ok">0</span> correctas &nbsp;&nbsp; ❌ <span id="l-mal">0</span> incorrectas</div>
+  </div>
+
+  <!-- ENVIANDO -->
+  <div id="s-enviando" class="pantalla">
+    <div class="cabecera">
+      <h1>🏗️ Taller de Construcciones</h1>
+      <p>Procesando resultados...</p>
+    </div>
+    <div class="card">
+      <div class="enviando-box">
+        <div class="spinner"></div>
+        <p>Enviando tus resultados a la profesora...<br>No cierres esta página.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTADO -->
+  <div id="s-resultado" class="pantalla">
+    <div class="cabecera">
+      <h1>¡Juego terminado!</h1>
+      <p>Resultados enviados a la profesora Bogni</p>
+    </div>
+    <div class="card">
+      <div class="circulo-score">
+        <span class="score-num" id="sc-num">0</span>
+        <span class="score-sub">de 20</span>
+      </div>
+      <p class="res-titulo" id="r-titulo"></p>
+      <p class="res-desc" id="r-desc"></p>
+      <div class="nota-caja">
+        <span>Nota estimada:</span>
+        <span class="nota-pill" id="nota-pill"></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="mail-box" id="mail-box"></div>
+    </div>
+    <div class="card">
+      <p class="detalle-titulo">Detalle de tus respuestas</p>
+      <div id="detalle-lista"></div>
+    </div>
+  </div>
+
+</div><!-- fin contenedor -->
+
+<!-- QR para imprimir (siempre visible en print, oculto en pantalla) -->
+<div class="qr-section" id="qr-section" style="display:none;">
+  <h3>🏗️ Juego — Taller de Construcciones</h3>
+  <p>Escaneá el QR con tu celular para jugar</p>
+  <div id="qr-canvas"></div>
+  <p class="qr-instruccion">E.P.E.T. N.° 1 Ing. Rogelio Boero<br>Prof. Bogni · 3.er año · 2026</p>
+  <button class="btn-imprimir" onclick="window.print()">🖨️ Imprimir QR</button>
+</div>
+
+<script>
+(function(){ emailjs.init({ publicKey: 'JbsAF5kSIDkI9dujf' }); })();
+
+const CLAVE_LOCAL = 'epet1_taller_2026_completado';
+
+const QQ = [
+  {g:"Guía 1 — Historia",t:"¿Qué significa CONSTRUIR según el cuadernillo?",o:["Levantar paredes sin un plan previo","Llevar a cabo una obra con estudio previo, herramientas y materiales adecuados","Comprar materiales y contratar obreros","Diseñar un plano en computadora"],c:1,e:"Construir es llevar a cabo una obra mediante un estudio previo, usando las herramientas y materiales adecuados, para lograr confort y seguridad."},
+  {g:"Guía 1 — Historia",t:"¿Cuáles fueron los dos primeros refugios del ser humano?",o:["Chozas de ladrillos y castillos","Cuevas y chozas de palos y ramas","Tiendas y cabañas de madera","Templos y viviendas de piedra"],c:1,e:"En un principio el ser humano se refugió en cuevas y bajo árboles. Luego, al volverse sedentario, construyó chozas con palos y ramas."},
+  {g:"Guía 1 — San Juan Sísmica",t:"¿Cuál fue la magnitud del terremoto de San Juan de 1944?",o:["5,5 Richter","6,0 Richter","7,4 Richter","8,1 Richter"],c:2,e:"El terremoto de 1944 tuvo 7,4 en la escala Richter y destruyó gran parte de la ciudad, obligando a crear normas antisísmicas."},
+  {g:"Guía 1 — Organismos",t:"¿Qué organismo fiscaliza las construcciones nuevas en San Juan?",o:["INPRES","Planeamiento (DPDU)","IRAM","INTI"],c:1,e:"Planeamiento (DPDU) fue creado en 1944 para fiscalizar todas las construcciones nuevas y sus ampliaciones en San Juan."},
+  {g:"Guía 1 — Profesionales",t:"¿Cuál es la diferencia principal entre un PROFESIONAL y un NO PROFESIONAL en la obra?",o:["El profesional trabaja más horas","El profesional tiene título universitario (ing./arq.); el no profesional no llega a ese nivel","El no profesional gana más dinero","No hay diferencia real"],c:1,e:"Los profesionales (ingenieros y arquitectos) tienen título universitario. Los no profesionales pueden tener capacitación pero sin carrera universitaria."},
+  {g:"Guía 2 — Seguridad",t:"¿Cuál de estas es una actitud básica de seguridad en la obra?",o:["Arrojar escombros donde haya espacio","Dejar herramientas tiradas en el suelo","Ser ORDENADO: cada herramienta vuelve a su lugar","Usar botellas de vidrio para agua"],c:2,e:"Las tres actitudes básicas son: ser ORDENADO, LIMPIO y PRECAVIDO. Cada herramienta debe volver a su lugar después de usarla."},
+  {g:"Guía 2 — EPP",t:"¿Qué EPP protege la cabeza en obra y NO puede ser reemplazado por gorra?",o:["Antiparras","Barbijo","Casco de seguridad","Protección auditiva"],c:2,e:"El casco de seguridad protege la cabeza de golpes y caída de materiales. Está prohibido reemplazarlo por gorras o gorros."},
+  {g:"Guía 2 — Herramientas",t:"¿Para qué se usa el FRATACHO?",o:["Cortar varillas de hierro","Alisar revoques y cielorrasos","Doblar hierros","Medir ángulos rectos"],c:1,e:"El fratacho se usa para alisar revoques y cielorrasos, obteniendo superficies más lisas."},
+  {g:"Guía 2 — Herramientas",t:"¿Qué herramienta sirve para tomar niveles horizontales a LARGAS distancias?",o:["Plomada","Cinta métrica","Nivel de burbuja","Nivel de manguera"],c:3,e:"El nivel de manguera sirve para tomar niveles horizontales en distancias largas, usando el principio de vasos comunicantes."},
+  {g:"Guía 2 — Herramientas",t:"¿Qué herramienta se usa para tomar niveles VERTICALES y verificar la verticalidad de muros?",o:["Escuadra","Plomada","Nivel láser","Wincha"],c:1,e:"La plomada sirve para tomar niveles verticales y verificar que los muros y columnas estén perfectamente verticales."},
+  {g:"Guía 3 — Materiales",t:"¿Cuál de estos es un material NO APROBADO para construcciones sismorresistentes?",o:["Cemento Portland","Ladrillo cocido","Adobe (barro sin procesar)","Hierro especial torsionado"],c:2,e:"El adobe, los palos, la caña y el barro sin procesar son materiales crudos o no aprobados porque no tienen elaboración previa ni controles de calidad."},
+  {g:"Guía 3 — Materiales",t:"¿Qué función cumplen los AGLUTINANTES en una mezcla?",o:["Dar color a la mezcla","Unir materiales","Acelerar el secado","Impermeabilizar la mezcla"],c:1,e:"Los aglutinantes (cemento y cal) tienen la función de unir materiales entre sí para formar el mortero u hormigón."},
+  {g:"Guía 3 — Hierro",t:"¿Qué característica tiene el HIERRO ESPECIAL (torsionado) que lo hace apto para estructuras sismorresistentes?",o:["Es liso y blando, fácil de doblar","Tiene una estría en su superficie que mejora la adherencia al hormigón y es duro y flexible","Se comercializa por kilo en rollos","Es más barato que el hierro común"],c:1,e:"El hierro especial torsionado tiene una estría que aumenta la adherencia al hormigón y contiene acero que lo hace duro y flexible. Es obligatorio en zona sísmica."},
+  {g:"Guía 3 — Replanteo",t:"¿Para qué sirve el MÉTODO 3-4-5 en el replanteo?",o:["Para calcular la cantidad de ladrillos por m²","Para verificar que una esquina tenga exactamente 90°","Para nivelar el terreno con manguera","Para calcular el estribo"],c:1,e:"El método 3-4-5 (basado en Pitágoras) verifica ángulos de 90°: 3 m en un muro, 4 m en el perpendicular, la diagonal debe medir 5 m."},
+  {g:"Guía 4 — Fases de Obra",t:"¿Cuál es la PRIMERA fase de trabajo en una obra?",o:["Armado de vigas y columnas","Llenado de columnas con hormigón","Limpieza, nivelación y replanteo del terreno","Elevación de muros"],c:2,e:"La primera fase es la limpieza, nivelación y replanteo del terreno. Sin ella, la obra quedaría desalineada o fuera de nivel desde el inicio."},
+  {g:"Guía 4 — Estructura",t:"¿Qué es el ESTRIBO y cuál es su función más importante en zona sísmica?",o:["Un tipo de ladrillo para muros gruesos","El elemento que une las barras longitudinales y resiste el corte sísmico","Una herramienta para doblar hierros","La base de hormigón bajo el cimiento"],c:1,e:"El estribo abraza las barras longitudinales. En sismos resiste las fuerzas de corte, confina el hormigón y aporta ductilidad. Es el componente sismorresistente más importante."},
+  {g:"Guía 4 — Estructura",t:"¿Qué tipo de VIGA se coloca sobre puertas y ventanas para soportar el peso del muro superior?",o:["Viga de fundación (V.F.)","Viga de encadenado (V.E.)","Viga dintel (V.D.)","Viga de carga (V.C.)"],c:2,e:"La viga dintel (V.D.) se coloca sobre las aberturas para soportar el peso del muro que queda por encima y evitar grietas."},
+  {g:"Guía 4 — Mampostería",t:"¿Cuántos ladrillones macizos (8×25 cm, junta 1,5 cm, aparejo a soga) entran aproximadamente en 1 m²?",o:["10 ladrillones","25 ladrillones","40 ladrillones","60 ladrillones"],c:2,e:"El procedimiento: 100÷9,5 ≈ 10 hiladas × 100÷26,5 ≈ 3,8 piezas/hilada = 38 → se toman 40 ladrillones/m². Con 5% de desperdicio son 42."},
+  {g:"Guía 4 — Cerámicos Chirino",t:"¿Cuántos cerámicos huecos Chirino Cerramiento 18×18×33 cm entran por m² de muro?",o:["8 cerámicos/m²","14,3 cerámicos/m²","25 cerámicos/m²","40 cerámicos/m²"],c:1,e:"El dato oficial de Industrias Chirino es 14,3 unidades/m² (aprox. 15 con 5% de desperdicio). El procedimiento: 5 hiladas × 2,9 piezas/hilada = 14,5 ≈ 14,3 oficial."},
+  {g:"Guía 4 — Mampostería",t:"¿Cuál es el proceso CORRECTO de elaboración del ladrillón macizo?",o:["Moldeo → cocción → secado → extracción → clasificación","Extracción → amasado → moldeo → secado al sol → cocción a 900-1000°C → clasificación","Amasado → secado → extracción → cocción → moldeo","Cocción → extracción → moldeo → amasado → secado"],c:1,e:"El proceso correcto es: 1) Extracción de arcilla, 2) Preparación y amasado, 3) Moldeo, 4) Secado al sol, 5) Cocción a 900-1000°C, 6) Enfriado y clasificación."}
+];
+
+let alumno = {}, idx = 0, resp = [], okCount = 0, malCount = 0;
+
+function mostrar(id) {
+  document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+  document.getElementById(id).classList.add('activa');
+}
+
+window.onload = function() {
+  if (localStorage.getItem(CLAVE_LOCAL)) {
+    mostrar('s-bloqueado');
+  }
+  generarQR();
+};
+
+function generarQR() {
+  const url = window.location.href.split('?')[0];
+  try {
+    new QRCode(document.getElementById('qr-canvas'), {
+      text: url,
+      width: 180,
+      height: 180,
+      colorDark: '#c0392b',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+    document.getElementById('qr-section').style.display = 'block';
+  } catch(e) {}
+}
+
+function iniciar() {
+  const n = document.getElementById('i-nombre').value.trim();
+  const c = document.getElementById('i-curso').value.trim();
+  const e = document.getElementById('i-email').value.trim();
+  if (!n || !c || !e || !e.includes('@')) {
+    document.getElementById('err-intro').style.display = 'block';
+    return;
+  }
+  alumno = { nombre: n, curso: c, email: e };
+  document.getElementById('h-alumno').textContent = n + ' — ' + c;
+  mostrar('s-juego');
+  renderPregunta();
+}
+
+function renderPregunta() {
+  const q = QQ[idx];
+  const pct = Math.round((idx + 1) / QQ.length * 100);
+  document.getElementById('prog-txt').textContent = 'Pregunta ' + (idx + 1) + ' de ' + QQ.length;
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('q-guia').textContent = q.g;
+  document.getElementById('q-texto').textContent = q.t;
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('btn-sig').style.display = 'none';
+  document.getElementById('l-ok').textContent = okCount;
+  document.getElementById('l-mal').textContent = malCount;
+
+  const wrap = document.getElementById('opciones');
+  wrap.innerHTML = '';
+  q.o.forEach(function(op, i) {
+    const b = document.createElement('button');
+    b.className = 'opcion';
+    b.textContent = op;
+    b.onclick = function() { responder(i); };
+    wrap.appendChild(b);
+  });
+}
+
+function responder(i) {
+  const q = QQ[idx];
+  document.querySelectorAll('.opcion').forEach(function(b, j) {
+    b.classList.add('bloqueada');
+    if (j === q.c) b.classList.add('correcta');
+    else if (j === i && i !== q.c) b.classList.add('incorrecta');
+  });
+  const esOk = i === q.c;
+  if (esOk) okCount++; else malCount++;
+  resp.push({ g: q.g, t: q.t, eli: q.o[i], cor: q.o[q.c], ok: esOk });
+
+  const fb = document.getElementById('feedback');
+  fb.style.display = 'block';
+  fb.className = 'feedback ' + (esOk ? 'ok' : 'mal');
+  fb.textContent = (esOk ? '✅ ¡Correcto! ' : '❌ Incorrecto. ') + q.e;
+
+  document.getElementById('l-ok').textContent = okCount;
+  document.getElementById('l-mal').textContent = malCount;
+
+  const bs = document.getElementById('btn-sig');
+  bs.textContent = idx < QQ.length - 1 ? 'Siguiente →' : 'Ver mis resultados →';
+  bs.style.display = 'block';
+}
+
+function siguiente() {
+  idx++;
+  if (idx >= QQ.length) finalizar();
+  else renderPregunta();
+}
+
+function calcNota(c) {
+  if (c >= 19) return '10';
+  if (c >= 17) return '9';
+  if (c >= 15) return '8';
+  if (c >= 13) return '7';
+  if (c >= 11) return '6';
+  if (c >= 9)  return '5';
+  if (c >= 7)  return '4';
+  return '3';
+}
+
+function finalizar() {
+  localStorage.setItem(CLAVE_LOCAL, '1');
+  mostrar('s-enviando');
+
+  const nota = calcNota(okCount);
+  const detalle = resp.map(function(r, i) {
+    return (i + 1) + '. [' + (r.ok ? 'CORRECTA' : 'INCORRECTA') + '] ' + r.g +
+      '\n   Pregunta: ' + r.t +
+      '\n   Respondió: ' + r.eli +
+      (r.ok ? '' : '\n   Correcta era: ' + r.cor);
+  }).join('\n\n');
+
+  emailjs.send('service_mjfww5d', 'template_av7brqt', {
+    nombre: alumno.nombre,
+    curso: alumno.curso,
+    email_alumno: alumno.email,
+    correctas: okCount + ' / 20',
+    nota: nota + '/10',
+    detalle: detalle
+  }).then(function() {
+    mostrarResultado(nota, true);
+  }).catch(function() {
+    mostrarResultado(nota, false);
+  });
+}
+
+function mostrarResultado(nota, enviado) {
+  mostrar('s-resultado');
+  document.getElementById('sc-num').textContent = okCount;
+
+  const ni = parseInt(nota);
+  const msgs = {
+    10: { t: '¡Excelente!', d: 'Dominás todos los contenidos del taller. ¡Felicitaciones!' },
+    9:  { t: '¡Muy bien!', d: 'Muy sólido tu conocimiento. ¡Seguí así!' },
+    8:  { t: '¡Bien!', d: 'Buen trabajo. Revisá los puntos que fallaste para afianzarlos.' },
+    7:  { t: 'Bien', d: 'Aprobado con buena nota. Repasá los temas que fallaste.' },
+    6:  { t: 'Aprobado', d: 'Pasaste, pero hay temas para reforzar. ¡Estudiá el cuadernillo!' },
+    5:  { t: 'Aprobado justo', d: 'Por poco. Necesitás repasar los contenidos con más atención.' },
+    4:  { t: 'Desaprobado', d: 'No alcanzaste el mínimo. Estudiá el cuadernillo y pedí ayuda a la profesora.' },
+    3:  { t: 'Para trabajar más', d: 'Necesitás repasar todos los contenidos del taller. ¡Vos podés!' }
+  };
+  const m = msgs[ni] || msgs[3];
+  document.getElementById('r-titulo').textContent = m.t;
+  document.getElementById('r-desc').textContent = m.d;
+
+  const pill = document.getElementById('nota-pill');
+  pill.textContent = nota + '/10';
+  if (ni >= 7) { pill.style.background = '#eafaf1'; pill.style.color = '#1e8449'; }
+  else if (ni >= 6) { pill.style.background = '#fef9e7'; pill.style.color = '#7d6608'; }
+  else { pill.style.background = '#fde8e8'; pill.style.color = '#922b21'; }
+
+  const mailBox = document.getElementById('mail-box');
+  if (enviado) {
+    mailBox.innerHTML = '📬 Resultado enviado correctamente a <strong>arq.bogni@gmail.com</strong><br><small>También te llegará una copia a ' + alumno.email + '</small>';
+  } else {
+    mailBox.innerHTML = '⚠️ Hubo un problema con el envío automático.<br><small>Mostrá esta pantalla a la profesora Bogni.</small>';
+    mailBox.style.background = '#fde8e8';
+    mailBox.style.borderColor = '#f1948a';
+    mailBox.style.color = '#922b21';
+  }
+
+  const lista = document.getElementById('detalle-lista');
+  lista.innerHTML = '';
+  resp.forEach(function(r, i) {
+    const d = document.createElement('div');
+    d.className = 'det-item';
+    d.innerHTML = '<div class="dot ' + (r.ok ? 'ok' : 'mal') + '"></div><div><span class="det-guia">' + r.g + '</span>' + (i + 1) + '. ' + r.t.substring(0, 68) + (r.t.length > 68 ? '…' : '') + '</div>';
+    lista.appendChild(d);
+  });
+}
+</script>
+</body>
+</html>
